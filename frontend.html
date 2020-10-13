@@ -1,0 +1,273 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initialscale=1.0">
+
+    <!-- JQuery Import -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <!-- BootStrap CSS and JS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <title>Smart Light Solution</title>
+
+    <style>
+        .switch {
+          position: relative;
+          display: inline-block;
+          width: 60px;
+          height: 34px;
+          margin: 125px;
+        }
+        
+        .switch input { 
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+        
+        .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: rgb(255, 0, 0);
+          -webkit-transition: .4s;
+          transition: .4s;
+        }
+        
+        .slider:before {
+          position: absolute;
+          content: "";
+          height: 26px;
+          width: 26px;
+          left: 4px;
+          bottom: 4px;
+          background-color: rgb(98, 9, 114);
+          -webkit-transition: .4s;
+          transition: .4s;
+        }
+        
+        input:checked + .slider {
+          background-color: #166aaf;
+        }
+        
+        input:focus + .slider {
+          box-shadow: 0 0 1px #2196F3;
+        }
+        
+        input:checked + .slider:before {
+          -webkit-transform: translateX(26px);
+          -ms-transform: translateX(26px);
+          transform: translateX(26px);
+        }
+        
+        /* Rounded sliders */
+        .slider.round {
+          border-radius: 34px;
+        }
+        
+        .slider.round:before {
+          border-radius: 50%;
+        }
+
+        .spinner-border {
+        display: block;
+        position: fixed;
+        z-index: 1031; /* High z-index so it is on top of the page */
+        top: 85%;
+        right: 48%; /* or: left: 50%; */
+        margin-top: -..px; /* half of the elements height */
+        margin-right: -..px; /* half of the elements widht */
+        }
+
+        .spinner-grow {
+        display: block;
+        position: fixed;
+        z-index: 1031; /* High z-index so it is on top of the page */
+        top: 85%;
+        right: 48%; /* or: left: 50%; */
+        margin-top: -..px; /* half of the elements height */
+        margin-right: -..px; /* half of the elements widht */
+        }
+
+        body {
+            background: url(background.jpg);
+            background-repeat: no-repeat;
+            background-size: auto;
+        }
+        
+    
+    </style>
+
+</head>
+
+<body>
+
+    <div class="jumbotron jumbotron-fluid" style="color:rgb(202, 123, 50); background-image: url('./header.jpg');">
+        <div class="container">
+          <h1 class="display-3">Control Panel</h1>
+          <p class="lead" style="font-size: 150%;">Smart Lights Solution</p>
+        </div>
+    </div>
+
+    <label class="switch">
+        <p style= "margin-top: 50px;">General Toggle Switch </p>
+        <input type="checkbox" checked id="toggle-light-general">
+        <span class="slider round"></span>
+    </label>
+
+    <label class="switch">
+        <p style= "margin-top: 50px;">Level 1 Toggle Switch </p>
+        <input type="checkbox" checked id="toggle-light-level1">
+        <span class="slider round"></span>
+    </label>
+
+    <label class="switch">
+        <p style= "margin-top: 50px;">Level 2 Toggle Switch </p>
+        <input type="checkbox" checked id="toggle-light-level2">
+        <span class="slider round"></span>
+    </label>
+
+    <div class="spinner-border" style="width: 6rem; height: 6rem;" role="status">
+        <span class="sr-only">Loading...</span>
+      </div>
+      <div class="spinner-grow" style="width: 6rem; height: 6rem;" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+
+    <script>
+        const backendurl = 'https://sit314jml911-bkend.herokuapp.com/update-lights';
+
+        const backendurlLights = 'https://sit314jml911-bkend.herokuapp.com/';
+        var lights = [];
+        getLights();
+
+        $('#toggle-light-general').on("click", function () {
+            if($('#toggle-light-general').attr('checked'))
+            {
+                $('#toggle-light-general').removeAttr('checked')
+                lights.forEach(ip => {
+                sendPost(ip.ip, false);
+            });
+            }
+            else
+            {
+                $('#toggle-light-general').attr('checked', '')
+                lights.forEach(ip => {
+                sendPost(ip.ip, true);
+            });
+            }
+        });
+
+        $("#toggle-light-level1").on("click", function () {
+            if($("#toggle-light-level1").attr('checked'))
+            {
+                $("#toggle-light-level1").removeAttr('checked')
+                lights.forEach(ip => {
+                    if(ip.level == 1)
+                    {
+                        sendPost(ip.ip, false);
+                    }
+            });
+            }
+            else
+            {
+                $("#toggle-light-level1").attr('checked', '')
+                lights.forEach(ip => {
+                    if(ip.level == 1)
+                    {
+                        sendPost(ip.ip, true);
+                    }
+            });
+            }
+        });
+
+        $("#toggle-light-level2").on("click", function () {
+            if($("#toggle-light-level2").attr('checked'))
+            {
+                $("#toggle-light-level2").removeAttr('checked')
+                lights.forEach(ip => {
+                    if (ip.level == 2)
+                    {
+                        sendPost(ip.ip, false);
+                    }
+            });
+            }
+            else
+            {
+                $("#toggle-light-level2").attr('checked', '')
+                lights.forEach(ip => {
+                    if (ip.level == 2)
+                    {
+                        sendPost(ip.ip, true);
+                    }
+            });
+            }
+        });
+
+        function createToggle() {
+            for(var i = 0; i < lights.length; i++){
+                $("body").append(`
+                <label class="switch">
+                    <p style= "margin-top: 50px;">Bulb ${i} Toggle Switch </p>
+                    <input type="checkbox" checked id=toggle-light-bulb ${i} onclick="eventToggle(event, ${i});">
+                    <span class="slider round"></span>
+                </label>
+                `)
+            }
+        }
+
+        function eventToggle(event, id) {
+            console.log("Hi");
+                if(event.target.getAttribute('checked'))
+                {
+                    event.target.removeAttribute('checked')
+                    sendPost(lights[id].ip, true);
+                }
+                else
+                {   var att = 
+                    document.createAttribute('checked');
+                    att.value =
+                    "checked";
+                    event.target.setAttributeNode(att)
+                    sendPost(lights[id].ip, false);
+                }
+        }
+
+        function getLights() {
+                lights = [];
+
+                $.get(backendurlLights, {},
+                    function (data, status) {
+                        data.forEach(element => {
+                            lights.push({ip: element._id, level: element.level});
+                        });
+                    createToggle();
+                    });
+        }
+
+        console.log(lights);
+
+        function sendPost(ip, status) {
+            $.post(backendurl,
+                {
+                    bulbip: ip,
+                    bulbstatus: status
+                },
+                function (data, status) {
+                    console.log("Data: " + data);
+                });
+            }
+    </script>
+</body>
+
+</html>
